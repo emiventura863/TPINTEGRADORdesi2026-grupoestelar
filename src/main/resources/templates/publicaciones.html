@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Listado de Publicaciones</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+
+    <div class="starter-template">
+        <h1>Gestión de Publicaciones</h1>
+        
+        <div class="menu">
+            <a th:href="@{/publicaciones-web/nueva}">Dar de alta Publicación</a>
+            <a th:href="@{/}">Volver al inicio</a>
+        </div>
+        
+        <br>
+        
+        <h2>Publicaciones Activas</h2>
+        
+        <div class="resultados">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Propiedad (Dirección)</th>
+                        <th>Precio Mensual</th>
+                        <th>Fecha de Publicación</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="pub : ${publicaciones}">
+                        <td th:text="${pub.id}"></td>
+                        <td th:text="${pub.propiedad.direccion + ', ' + pub.propiedad.ciudad}"></td>
+                        <td th:text="'$' + ${pub.precioMensual}"></td>
+                        <td th:text="${pub.fechaPublicacion}"></td>
+                        <td th:text="${pub.estadoPublicacion}"></td>
+                        <td>
+                            <table class="botones">
+                                <tr>
+                                    <td>
+                                        <form th:action="@{/publicaciones-web/editar/{id}(id=${pub.id})}" method="get">
+                                            <input type="submit" value="Modificar">
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form th:action="@{/publicaciones-web/eliminar/{id}(id=${pub.id})}" method="post">
+                                            <input type="submit" value="Eliminar" onclick="return confirm('¿Está seguro de eliminar esta publicación?');">
+                                        </form>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>
