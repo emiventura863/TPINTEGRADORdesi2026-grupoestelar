@@ -17,7 +17,7 @@ public interface ContratoRepositorio extends JpaRepository<Contrato, Integer> {
 	List<Contrato> findByEliminadoFalse();
 
 	// para validar contratos activos
-	// Buscá si existe un contrato que pertenezca a una propiedad específica, con un
+	// Buscar si existe un contrato que pertenezca a una propiedad específica, con un
 	// estado específico, y que no esté eliminado
 	boolean existsByPropiedadAndEstadoAndEliminadoFalse(Propiedad propiedad, EstadoContrato estado);
 

@@ -29,7 +29,7 @@ public class ContratoControlador {
 		this.contratoServicio = contratoServicio;
 	}
 
-	// Maneja las solicitudes GET.
+	// Maneja las solicitudes GET
 	// Si se envía un parámetro de búsqueda, devuelve los contratos filtrados.
 	// Si no se envía ningún parámetro, devuelve todos los contratos no eliminados.
 	@GetMapping
@@ -53,8 +53,9 @@ public class ContratoControlador {
 	@PostMapping // Este método maneja las solicitudes http de tipo POST (envias datos y se
 					// genera).
 	public Contrato guardarContrato(@RequestBody Contrato contrato) { // @RequestBody Convierte el cuerpo de la
-																		// solicitud (JSON) en un objeto Java,
-		return contratoServicio.guardarContrato(contrato); // que se usa como entrada en el método
+																		// solicitud (JSON) en un objeto Java, que se
+																		// usa como entrada en el método
+		return contratoServicio.guardarContrato(contrato);
 	}
 
 	// recibe un contrato actualizado desde la petición, le asigna el ID de la ruta
