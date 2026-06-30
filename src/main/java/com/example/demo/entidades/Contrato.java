@@ -125,9 +125,5 @@ public class Contrato {
 	// cuando lee datos de la base de datos.
 	public Contrato() {
 	}
-	
-	
-	
-	
-	
+
 }

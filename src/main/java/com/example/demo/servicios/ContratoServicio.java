@@ -1,5 +1,6 @@
 package com.example.demo.servicios;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -30,10 +31,39 @@ public class ContratoServicio {
 		return contratoRepositorio.findByEliminadoFalse();
 	}
 
+	// Filtra el listado de contratos según el dato recibido.
+	// Se utiliza un filtro a la vez para simplificar la búsqueda.
+	public List<Contrato> filtrarContratos(Integer propiedadId, Integer inquilinoId, EstadoContrato estado,
+			LocalDate fechaInicio) {
+
+		// Si se recibe una propiedad, devuelve los contratos de esa propiedad.
+		if (propiedadId != null) {
+			return contratoRepositorio.findByEliminadoFalseAndPropiedadId(propiedadId);
+		}
+
+		// Si se recibe un inquilino, devuelve los contratos de ese inquilino.
+		if (inquilinoId != null) {
+			return contratoRepositorio.findByEliminadoFalseAndInquilinoId(inquilinoId);
+		}
+
+		// Si se recibe un estado, devuelve los contratos con ese estado.
+		if (estado != null) {
+			return contratoRepositorio.findByEliminadoFalseAndEstado(estado);
+		}
+
+		// Si se recibe una fecha de inicio, devuelve los contratos de esa fecha.
+		if (fechaInicio != null) {
+			return contratoRepositorio.findByEliminadoFalseAndFechaInicio(fechaInicio);
+		}
+
+		// Si no se recibe ningún filtro, devuelve todos los contratos no eliminados.
+		return contratoRepositorio.findByEliminadoFalse();
+	}
+
 	// guarda el contrato en la BD y devuelve el contrato guardado
-	//	public Contrato guardarContrato(Contrato contrato) {
-	//		return contratoRepositorio.save(contrato);
-	//	}
+	// public Contrato guardarContrato(Contrato contrato) {
+	// return contratoRepositorio.save(contrato);
+	// }
 
 	@Transactional
 	public Contrato guardarContrato(Contrato contrato) {
@@ -90,8 +120,19 @@ public class ContratoServicio {
 		}
 
 		// VALIDACIÓN 2
-		// Si el contrato se quiere guardar como ACTIVO, debemos verificar las reglas del negocio.
-		if (contrato.getEstado() == EstadoContrato.ACTIVO) {
+		// Solo ejecutamos esta validación cuando el contrato se está ACTIVANDO.
+		//
+		// Es decir:
+		// - Si es un contrato nuevo y se crea como ACTIVO.
+		// - O si un contrato BORRADOR pasa a ACTIVO.
+		//
+		// Si el contrato ya estaba ACTIVO y solo estamos modificando datos
+		// (importe, duración, descripción, etc.), no corresponde volver a validar
+		// la disponibilidad de la propiedad.
+		boolean seEstaActivando = contrato.getEstado() == EstadoContrato.ACTIVO
+				&& (contratoActual == null || contratoActual.getEstado() != EstadoContrato.ACTIVO);
+
+		if (seEstaActivando) {
 
 			// La propiedad debe estar disponible para poder alquilarse.
 			if (contrato.getPropiedad().getEstado() != EstadoPropiedad.DISPONIBLE) {
@@ -100,23 +141,37 @@ public class ContratoServicio {
 			}
 
 			// Verificamos que la propiedad no tenga ya otro contrato activo.
-			boolean existeContratoActivo = contratoRepositorio
-					.existsByPropiedadAndEstadoAndEliminadoFalse(contrato.getPropiedad(), EstadoContrato.ACTIVO);
+			// Si estamos modificando un contrato, se excluye el mismo contrato de la
+			// búsqueda para que no se detecte a sí mismo como duplicado.
+			boolean existeContratoActivo;
+
+			if (contrato.getId() == null) {
+
+				// Contrato nuevo
+				existeContratoActivo = contratoRepositorio
+						.existsByPropiedadAndEstadoAndEliminadoFalse(contrato.getPropiedad(), EstadoContrato.ACTIVO);
+
+			} else {
+
+				// Contrato existente
+				existeContratoActivo = contratoRepositorio.existsByPropiedadAndEstadoAndEliminadoFalseAndIdNot(
+						contrato.getPropiedad(), EstadoContrato.ACTIVO, contrato.getId());
+			}
 
 			if (existeContratoActivo) {
-
 				throw new RuntimeException("La propiedad ya posee un contrato activo.");
 			}
 
-			// Si pasó todas las validaciones, cambiamos automáticamente el estado de la propiedad a ALQUILADA.
+			// Si todas las validaciones fueron correctas, la propiedad pasa a ALQUILADA.
 			contrato.getPropiedad().setEstado(EstadoPropiedad.ALQUILADA);
 
-			// Guardamos el cambio de estado de la propiedad.
+			// Guardamos el nuevo estado de la propiedad.
 			propiedadRepositorio.save(contrato.getPropiedad());
 		}
 
 		// VALIDACIÓN 3
-		// Si un contrato ACTIVO pasa a FINALIZADO o RESCINDIDO, la propiedad vuelve a estar DISPONIBLE.
+		// Si un contrato ACTIVO pasa a FINALIZADO o RESCINDIDO, la propiedad vuelve a
+		// estar DISPONIBLE.
 		if (contratoActual != null && contratoActual.getEstado() == EstadoContrato.ACTIVO
 				&& (contrato.getEstado() == EstadoContrato.FINALIZADO
 						|| contrato.getEstado() == EstadoContrato.RESCINDIDO)) {
@@ -126,8 +181,7 @@ public class ContratoServicio {
 			propiedadRepositorio.save(contrato.getPropiedad());
 		}
 
-		// Si todas las validaciones fueron correctas,
-		// finalmente guardamos el contrato en la base de datos.
+		// Si todas las validaciones fueron correctas, finalmente guardamos el contrato en la base de datos.
 		return contratoRepositorio.save(contrato);
 	}
 
