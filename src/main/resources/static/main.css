@@ -1,0 +1,142 @@
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+}
+
+.contenedor {
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 24px;
+    border: 1px solid #ccc;
+}
+
+h1 {
+    color: #1a5276;
+    border-bottom: 2px solid #1a5276;
+    padding-bottom: 8px;
+}
+
+h2 {
+    color: #2874a6;
+    margin-top: 24px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 16px;
+}
+
+th {
+    background-color: #2874a6;
+    color: #fff;
+    padding: 10px;
+    text-align: left;
+}
+
+td {
+    padding: 8px 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.boton,
+button,
+.boton-secundario {
+    display: inline-block;
+    padding: 8px 14px;
+    text-decoration: none;
+    border: 1px solid #1a5276;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.boton,
+button {
+    background-color: #2874a6;
+    color: #fff;
+}
+
+.boton-secundario {
+    background-color: #eee;
+    color: #333;
+    border-color: #999;
+}
+
+.formulario label,
+.formulario-filtros label {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.formulario input,
+.formulario select,
+.formulario-filtros input,
+.formulario-filtros select {
+    display: block;
+    width: 100%;
+    max-width: 400px;
+    padding: 6px;
+    margin-top: 4px;
+    border: 1px solid #aaa;
+}
+
+.formulario-filtros {
+    background-color: #f0f8ff;
+    padding: 16px;
+    border: 1px solid #bcd;
+}
+
+.seccion-pago {
+    margin-top: 16px;
+    padding: 12px;
+    border: 1px solid #ccc;
+}
+
+.acciones-formulario {
+    margin-top: 20px;
+}
+
+.acciones a {
+    margin-right: 10px;
+}
+
+.form-inline {
+    display: inline;
+}
+
+.mensaje-ok {
+    color: #196f3d;
+    background-color: #d5f5e3;
+    padding: 10px;
+    border: 1px solid #27ae60;
+}
+
+.mensaje-error,
+.error-campo {
+    color: #922b21;
+}
+
+.mensaje-error {
+    background-color: #fadbd8;
+    padding: 10px;
+    border: 1px solid #c0392b;
+}
+
+.error-campo {
+    display: block;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.acciones button {
+    background-color: #c0392b;
+    border-color: #922b21;
+}
