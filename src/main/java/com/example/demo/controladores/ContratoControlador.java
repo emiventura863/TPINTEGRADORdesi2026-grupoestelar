@@ -42,8 +42,10 @@ public class ContratoControlador {
 
 	// Este método maneja las solicitudes http de tipo GET a la ruta con un id
 	// específico y devuelve el contrato correspondiente si lo encuentra
+
 	@GetMapping("/{id}") // Esta ruta define un endpoint que espera un 'identificador' en la URL y lo
 							// utiliza para buscar un contrato específico
+
 	public Contrato buscarPorId(@PathVariable Integer id) {
 		return contratoServicio.buscarPorId(id);
 	}
@@ -60,8 +62,10 @@ public class ContratoControlador {
 
 	// recibe un contrato actualizado desde la petición, le asigna el ID de la ruta
 	// y lo guarda, actualizando el registro en la base de datos
+
 	@PutMapping("/{id}") // Este método maneja las solicitudes http de tipo PUT (envias datos y se
 							// actualiza).
+
 	public Contrato actualizarContrato(@PathVariable Integer id, @RequestBody Contrato contrato) {
 		contrato.setId(id);
 		return contratoServicio.guardarContrato(contrato);

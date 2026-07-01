@@ -68,7 +68,8 @@ public class ContratoServicio {
 	@Transactional
 	public Contrato guardarContrato(Contrato contrato) {
 
-		// Validamos datos obligatorios y valores numéricos según el TP.
+		// validar datos obligatorios y valores numericos
+
 		if (contrato.getPropiedad() == null) {
 			throw new RuntimeException("Debe seleccionar una propiedad.");
 		}
@@ -97,8 +98,18 @@ public class ContratoServicio {
 			throw new RuntimeException("El día de vencimiento debe estar entre 1 y 31.");
 		}
 
+		// descripción obligatoria
+		if (contrato.getDescripcion() == null || contrato.getDescripcion().trim().isEmpty()) {
+			throw new RuntimeException("Debe ingresar una descripción.");
+		}
+
+		// if (contrato.getEstado() == null) {
+		// contrato.setEstado(EstadoContrato.BORRADOR);
+		// }
+
+		// estado de contrato
 		if (contrato.getEstado() == null) {
-			contrato.setEstado(EstadoContrato.BORRADOR);
+			throw new RuntimeException("El estado del contrato es obligatorio");
 		}
 
 		// Si el contrato tiene un ID significa que ya existe y lo estamos modificando.
@@ -107,9 +118,14 @@ public class ContratoServicio {
 
 		if (contrato.getId() != null) {
 			contratoActual = buscarPorId(contrato.getId());
+
+			// Si el contrato no existe, no se puede realizar la modificacion
+			if (contratoActual == null) {
+				throw new RuntimeException("No existe un contrato con el ID indicado.");
+			}
 		}
 
-		// VALIDACIÓN 1
+		// 1
 		// Un contrato FINALIZADO o RESCINDIDO no puede volver a ACTIVO.
 		if (contratoActual != null
 				&& (contratoActual.getEstado() == EstadoContrato.FINALIZADO
@@ -119,16 +135,18 @@ public class ContratoServicio {
 			throw new RuntimeException("No se puede volver un contrato finalizado o rescindido a ACTIVO.");
 		}
 
-		// VALIDACIÓN 2
+		// 2
 		// Solo ejecutamos esta validación cuando el contrato se está ACTIVANDO.
-		//
+
 		// Es decir:
-		// - Si es un contrato nuevo y se crea como ACTIVO.
-		// - O si un contrato BORRADOR pasa a ACTIVO.
-		//
+		// Indica si el contrato esta pasando al estado ACTIVO.
+		// Esto ocurre cuando se crea un contrato nuevo como ACTIVO
+		// o cuando un contrato BORRADOR cambia a ACTIVO.
+		
 		// Si el contrato ya estaba ACTIVO y solo estamos modificando datos
 		// (importe, duración, descripción, etc.), no corresponde volver a validar
 		// la disponibilidad de la propiedad.
+		
 		boolean seEstaActivando = contrato.getEstado() == EstadoContrato.ACTIVO
 				&& (contratoActual == null || contratoActual.getEstado() != EstadoContrato.ACTIVO);
 
@@ -169,7 +187,7 @@ public class ContratoServicio {
 			propiedadRepositorio.save(contrato.getPropiedad());
 		}
 
-		// VALIDACIÓN 3
+		// 3
 		// Si un contrato ACTIVO pasa a FINALIZADO o RESCINDIDO, la propiedad vuelve a
 		// estar DISPONIBLE.
 		if (contratoActual != null && contratoActual.getEstado() == EstadoContrato.ACTIVO
@@ -181,8 +199,10 @@ public class ContratoServicio {
 			propiedadRepositorio.save(contrato.getPropiedad());
 		}
 
-		// Si todas las validaciones fueron correctas, finalmente guardamos el contrato en la base de datos.
+		// Si todas las validaciones fueron correctas, finalmente guardamos el contrato
+		// en la base de datos.
 		return contratoRepositorio.save(contrato);
+
 	}
 
 	// busca un contrato por su id y lo devuelve, si no encuentra devuelve null
@@ -190,7 +210,7 @@ public class ContratoServicio {
 		return contratoRepositorio.findById(id).orElse(null);
 	}
 
-	// elimina el contrato con el id dado sin devolver nada (void), si existe
+	// elimina el contrato con el id dado sin devolver nada (void), si existe y si esta en estado borrador, sino, lo avisa con un mensaje
 	public void eliminarContrato(Integer id) {
 		Contrato contrato = buscarPorId(id);
 
