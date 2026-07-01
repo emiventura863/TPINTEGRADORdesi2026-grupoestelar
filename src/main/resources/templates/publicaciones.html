@@ -9,16 +9,45 @@
 
     <div class="starter-template">
         <h1>Gestión de Publicaciones</h1>
-        
+
         <div class="menu">
             <a th:href="@{/publicaciones-web/nueva}">Dar de alta Publicación</a>
             <a th:href="@{/}">Volver al inicio</a>
         </div>
-        
-        <br>
-        
-        <h2>Publicaciones Activas</h2>
-        
+
+        <div th:if="${errorMensaje != null}" style="color: red; margin: 10px 0;">
+            <p th:text="${errorMensaje}"></p>
+        </div>
+
+        <h2>Publicaciones registradas</h2>
+
+        <form th:action="@{/publicaciones-web}" method="get" style="margin-bottom: 20px;">
+            <label>Propiedad:</label>
+            <select name="propiedad">
+                <option value="">Todas</option>
+                <option th:each="prop : ${propiedades}" th:value="${prop.id}" th:text="${prop.direccion + ' (' + prop.ciudad + ')'}"></option>
+            </select>
+
+            <label style="margin-left: 10px;">Ciudad:</label>
+            <input type="text" name="ciudad" />
+
+            <label style="margin-left: 10px;">Estado:</label>
+            <select name="estado">
+                <option value="">Todos</option>
+                <option value="ACTIVA">ACTIVA</option>
+                <option value="PAUSADA">PAUSADA</option>
+                <option value="FINALIZADA">FINALIZADA</option>
+            </select>
+
+            <label style="margin-left: 10px;">Precio mínimo:</label>
+            <input type="number" step="0.01" name="precioMin" />
+
+            <label style="margin-left: 10px;">Precio máximo:</label>
+            <input type="number" step="0.01" name="precioMax" />
+
+            <button type="submit">Filtrar</button>
+        </form>
+
         <div class="resultados">
             <table>
                 <thead>
@@ -49,6 +78,11 @@
                                     <td>
                                         <form th:action="@{/publicaciones-web/eliminar/{id}(id=${pub.id})}" method="post">
                                             <input type="submit" value="Eliminar" onclick="return confirm('¿Está seguro de eliminar esta publicación?');">
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form th:action="@{/publicaciones-web/{id}/historial(id=${pub.id})}" method="get">
+                                            <input type="submit" value="Historial">
                                         </form>
                                     </td>
                                 </tr>

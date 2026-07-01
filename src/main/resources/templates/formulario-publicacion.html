@@ -9,19 +9,24 @@
 
     <div class="starter-template">
         <h1 th:text="${publicacion.id != null} ? 'Modificar Publicación' : 'Alta de Publicación'">Formulario</h1>
-        
+
+        <div th:if="${errorMensaje != null}" style="color: red; margin-bottom: 15px;">
+            <p th:text="${errorMensaje}"></p>
+        </div>
+
         <form th:action="@{/publicaciones-web/guardar}" th:object="${publicacion}" method="post">
             <input type="hidden" th:field="*{id}">
-            
+
             <div style="margin-bottom: 15px;">
                 <label>Propiedad:</label>
-                <select th:field="*{propiedad.id}" required>
+                <select th:field="*{propiedad.id}" required th:disabled="${publicacion.id != null}">
                     <option value="">-- Seleccione una Propiedad --</option>
-                    <option th:each="prop : ${propiedades}" 
-                            th:value="${prop.id}" 
+                    <option th:each="prop : ${propiedades}"
+                            th:value="${prop.id}"
                             th:text="${prop.direccion + ' (' + prop.ciudad + ')'}">
                     </option>
                 </select>
+                <input type="hidden" th:if="${publicacion.id != null}" th:field="*{propiedad.id}" />
             </div>
 
             <div style="margin-bottom: 15px;">
