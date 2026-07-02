@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="ISO-8859-1">
+    <title>Historial de Publicación</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}">
+</head>
+<body>
+    <div class="starter-template">
+        <h1>Historial de estados</h1>
+
+        <div th:if="${errorMensaje != null}" style="color: red; margin-bottom: 15px;">
+            <p th:text="${errorMensaje}"></p>
+        </div>
+
+        <h2 th:text="'Publicación #' + ${publicacion.id}"></h2>
+        <p><strong>Propiedad:</strong> <span th:text="${publicacion.propiedad.direccion + ' - ' + publicacion.propiedad.ciudad}"></span></p>
+        <p><strong>Estado actual:</strong> <span th:text="${publicacion.estadoPublicacion}"></span></p>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="item : ${historial}">
+                    <td th:text="${item.fechaCambio}"></td>
+                    <td th:text="${item.estado}"></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="menu" style="margin-top: 20px;">
+            <a th:href="@{/publicaciones-web}">Volver al listado</a>
+        </div>
+    </div>
+</body>
+</html>
