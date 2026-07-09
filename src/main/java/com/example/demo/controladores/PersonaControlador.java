@@ -24,7 +24,7 @@ public class PersonaControlador {
 
 	@GetMapping
 	public List<Persona> listar() {
-		return personaRepositorio.findByEliminadoFalse(); // devuelve solo registros no eliminados
+		return personaRepositorio.findByEliminadoFalse(); // devuelve solo las personas que no estan eliminadas 
 	}
 
 	@PostMapping
