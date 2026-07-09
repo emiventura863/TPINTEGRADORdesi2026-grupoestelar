@@ -1,14 +1,15 @@
 package com.example.demo.entidades;
 
 import java.time.LocalDate;
+
 import com.example.demo.enums.EstadoPublicacion;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -19,20 +20,16 @@ public class Publicacion {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(name = "propiedad_id")
     private Propiedad propiedad;
 
     private Double precioMensual;
-
-    @Column(columnDefinition = "TEXT")
     private String condicionesAlquiler;
-
-    @Column(columnDefinition = "TEXT")
     private String descripcion;
-
     private LocalDate fechaPublicacion;
 
     @Enumerated(EnumType.STRING)
-    private EstadoPublicacion estadoPublicacion = EstadoPublicacion.ACTIVA;
+    private EstadoPublicacion estadoPublicacion;
 
     private Boolean eliminado = false;
 

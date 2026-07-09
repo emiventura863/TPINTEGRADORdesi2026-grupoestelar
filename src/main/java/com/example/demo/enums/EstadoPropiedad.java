@@ -1,9 +1,8 @@
 package com.example.demo.enums;
 
 public enum EstadoPropiedad {
-
-	DISPONIBLE,
-	RESERVADA,
-	ALQUILADA,
-	ACTIVA
+    DISPONIBLE,
+    RESERVADA,
+    ALQUILADA,
+    INACTIVA
 }

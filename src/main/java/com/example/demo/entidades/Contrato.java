@@ -1,150 +1,49 @@
 package com.example.demo.entidades;
 
-import java.time.LocalDate;
-
+import jakarta.persistence.*;
 import com.example.demo.enums.EstadoContrato;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-
-@Entity /* representa una tabla en la BD */
+@Entity
 public class Contrato {
 
-//	clave primaria
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
-	@ManyToOne
-	private Propiedad propiedad;
+    // almacenamos el id de la propiedad para que Spring Data pueda generar existsByPropiedadIdAndEstado(...)
+    private Integer propiedadId;
 
-	@ManyToOne
-	private Persona inquilino;
+    @Enumerated(EnumType.STRING)
+    private EstadoContrato estado;
 
-	private LocalDate fechaInicio;
-	private Integer duracionMeses;
-	private Double importeMensual;
-	private Integer diaVencimiento;
-	private String descripcion;
+    public Contrato() {}
 
-	// guardar como texto BORRADOR, ACTIVO, ETC
-	@Enumerated(EnumType.STRING)
-	private EstadoContrato estado = EstadoContrato.BORRADOR;
+    public Contrato(Integer propiedadId, EstadoContrato estado) {
+        this.propiedadId = propiedadId;
+        this.estado = estado;
+    }
 
-	// Indica si el contrato ha sido eliminado (eliminación lógica). Se usa para
-	// marcar el contrato sin borrarlo físicamente de la base de datos
-	// en vez de borrarlo de la base, cambia el valor a true y así podés mantener el
-	// registro, pero ocultarlo de las operaciones normales.
-	// con los getters y setters puedo modificar ese estado cuando lo necesites, sin
-	// perder la información.
+    public Integer getId() {
+        return id;
+    }
 
-	private Boolean eliminado = false;
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public Boolean getEliminado() {
-		return eliminado;
-	}
+    public Integer getPropiedadId() {
+        return propiedadId;
+    }
 
-	public void setEliminado(Boolean eliminado) {
-		this.eliminado = eliminado;
-	}
+    public void setPropiedadId(Integer propiedadId) {
+        this.propiedadId = propiedadId;
+    }
 
-	// getters y setters
-	public Integer getId() {
-		return id;
-	}
+    public EstadoContrato getEstado() {
+        return estado;
+    }
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
-
-	public Propiedad getPropiedad() {
-		return propiedad;
-	}
-
-	public void setPropiedad(Propiedad propiedad) {
-		this.propiedad = propiedad;
-	}
-
-	public Persona getInquilino() {
-		return inquilino;
-	}
-
-	public void setInquilino(Persona inquilino) {
-		this.inquilino = inquilino;
-	}
-
-	public LocalDate getFechaInicio() {
-		return fechaInicio;
-	}
-
-	public void setFechaInicio(LocalDate fechaInicio) {
-		this.fechaInicio = fechaInicio;
-	}
-
-	public Integer getDuracionMeses() {
-		return duracionMeses;
-	}
-
-	public void setDuracionMeses(Integer duracionMeses) {
-		this.duracionMeses = duracionMeses;
-	}
-
-	public Double getImporteMensual() {
-		return importeMensual;
-	}
-
-	public void setImporteMensual(Double importeMensual) {
-		this.importeMensual = importeMensual;
-	}
-
-	public Integer getDiaVencimiento() {
-		return diaVencimiento;
-	}
-
-	public void setDiaVencimiento(Integer diaVencimiento) {
-		this.diaVencimiento = diaVencimiento;
-	}
-
-	public String getDescripcion() {
-		return descripcion;
-	}
-
-	public void setDescripcion(String descripcion) {
-		this.descripcion = descripcion;
-	}
-
-	public EstadoContrato getEstado() {
-		return estado;
-	}
-
-	public void setEstado(EstadoContrato estado) {
-		this.estado = estado;
-	}
-
-	// constructor con los atributos
-	public Contrato(Integer id, Propiedad propiedad, Persona inquilino, LocalDate fechaInicio, Integer duracionMeses,
-			Double importeMensual, Integer diaVencimiento, String descripcion, EstadoContrato estado) {
-		super();
-		this.id = id;
-		this.propiedad = propiedad;
-		this.inquilino = inquilino;
-		this.fechaInicio = fechaInicio;
-		this.duracionMeses = duracionMeses;
-		this.importeMensual = importeMensual;
-		this.diaVencimiento = diaVencimiento;
-		this.descripcion = descripcion;
-		this.estado = estado;
-	}
-
-	// constructor vacio publico, Spring Boot (a través de JPA/Hibernate) necesita
-	// poder crear objetos de Contrato automáticamente
-	// cuando lee datos de la base de datos.
-	public Contrato() {
-	}
-
+    public void setEstado(EstadoContrato estado) {
+        this.estado = estado;
+    }
 }

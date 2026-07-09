@@ -3,13 +3,13 @@ package com.example.demo.entidades;
 import java.time.LocalDateTime;
 
 import com.example.demo.enums.EstadoPublicacion;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
 @Entity
@@ -20,12 +20,13 @@ public class EstadoPublicacionHistorial {
     private Integer id;
 
     @ManyToOne
+    @JoinColumn(name = "publicacion_id")
     private Publicacion publicacion;
 
     @Enumerated(EnumType.STRING)
     private EstadoPublicacion estado;
 
-    private LocalDateTime fechaCambio = LocalDateTime.now();
+    private LocalDateTime fechaHora = LocalDateTime.now();
 
     public EstadoPublicacionHistorial() {
     }
@@ -54,11 +55,11 @@ public class EstadoPublicacionHistorial {
         this.estado = estado;
     }
 
-    public LocalDateTime getFechaCambio() {
-        return fechaCambio;
+    public LocalDateTime getFechaHora() {
+        return fechaHora;
     }
 
-    public void setFechaCambio(LocalDateTime fechaCambio) {
-        this.fechaCambio = fechaCambio;
+    public void setFechaHora(LocalDateTime fechaHora) {
+        this.fechaHora = fechaHora;
     }
 }

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Editar Propiedad</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        form { max-width: 600px; }
+        div { margin-bottom: 10px; }
+        label { display: block; font-weight: bold; margin-bottom: 4px; }
+        input, select, textarea, button { width: 100%; padding: 8px; }
+        button { width: auto; margin-top: 10px; }
+        .error { color: red; font-size: 12px; }
+        .alert { color: red; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <h1>Gestión de Propiedades</h1>
+
+    <div th:if="${error}" class="alert" th:text="${error}"></div>
+
+    <form th:action="@{/propiedades/guardar}" th:object="${formBean}" method="post">
+        <input type="hidden" th:field="*{id}">
+
+        <div>
+            <label>Dirección:</label>
+            <input type="text" th:field="*{direccion}" required />
+            <p class="error" th:if="${#fields.hasErrors('direccion')}" th:errors="*{direccion}"></p>
+        </div>
+
+        <div>
+            <label>Ciudad:</label>
+            <input type="text" th:field="*{ciudad}" required />
+            <p class="error" th:if="${#fields.hasErrors('ciudad')}" th:errors="*{ciudad}"></p>
+        </div>
+
+        <div>
+            <label>Tipo:</label>
+            <select th:field="*{tipo}" required>
+                <option value="">Seleccione...</option>
+                <option th:each="t : ${T(com.example.demo.enums.TipoPropiedad).values()}" th:value="${t}" th:text="${t}"></option>
+            </select>
+            <p class="error" th:if="${#fields.hasErrors('tipo')}" th:errors="*{tipo}"></p>
+        </div>
+
+        <div>
+            <label>Cantidad de Ambientes:</label>
+            <input type="number" th:field="*{cantidadAmbientes}" min="1" required />
+            <p class="error" th:if="${#fields.hasErrors('cantidadAmbientes')}" th:errors="*{cantidadAmbientes}"></p>
+        </div>
+
+        <div>
+            <label>Metros Cuadrados:</label>
+            <input type="number" step="0.01" th:field="*{metrosCuadrados}" min="0.1" required />
+            <p class="error" th:if="${#fields.hasErrors('metrosCuadrados')}" th:errors="*{metrosCuadrados}"></p>
+        </div>
+
+        <div>
+            <label>Descripción:</label>
+            <textarea th:field="*{descripcion}" required></textarea>
+            <p class="error" th:if="${#fields.hasErrors('descripcion')}" th:errors="*{descripcion}"></p>
+        </div>
+
+        <div>
+            <label>Comodidades:</label>
+            <textarea th:field="*{comodidades}"></textarea>
+        </div>
+
+        <div>
+            <label>Estado:</label>
+            <select th:field="*{estado}">
+                <option th:each="e : ${T(com.example.demo.enums.EstadoPropiedad).values()}" th:value="${e}" th:text="${e}"></option>
+            </select>
+        </div>
+
+        <div>
+            <label>Propietario:</label>
+            <select th:field="*{idPropietario}" required>
+                <option value="">Seleccione un propietario</option>
+                <option th:each="p : ${allPersonas}" th:value="${p.id}" th:text="${p.nombre + ' ' + p.apellido}"></option>
+            </select>
+            <p class="error" th:if="${#fields.hasErrors('idPropietario')}" th:errors="*{idPropietario}"></p>
+        </div>
+
+        <button type="submit">Guardar Cambios</button>
+        <a th:href="@{/propiedades}">Cancelar</a>
+    </form>
+</body>
+</html>
