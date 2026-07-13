@@ -37,13 +37,7 @@ public class FacturaControlador {
 		this.propiedadRepositorio = propiedadRepositorio;
 		this.personaRepositorio = personaRepositorio;
 	}
-
-	@GetMapping("/")
-	public String inicio() {
-		return "redirect:/facturas";
-	}
-
-	@GetMapping("/facturas")
+@GetMapping("/facturas")
 	public String listar(@RequestParam(required = false) Integer contratoId,
 			@RequestParam(required = false) Integer propiedadId,
 			@RequestParam(required = false) Integer inquilinoId,
@@ -164,3 +158,4 @@ public class FacturaControlador {
 	}
 
 }
+

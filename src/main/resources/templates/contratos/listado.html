@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Gestión de Contratos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 30px;
+            background: #f4f4f4;
+        }
+
+        .contenedor {
+            max-width: 1200px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border: 1px solid #ccc;
+        }
+
+        h1, h2 {
+            color: #174f75;
+        }
+
+        .acciones-superiores {
+            margin-bottom: 20px;
+        }
+
+        .boton {
+            display: inline-block;
+            padding: 8px 12px;
+            text-decoration: none;
+            background: #2176a5;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        .filtros {
+            background: #eaf4fb;
+            border: 1px solid #b8d3e5;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .filtros label {
+            display: inline-block;
+            margin-right: 12px;
+            margin-bottom: 10px;
+        }
+
+        input, select {
+            padding: 6px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #2176a5;
+            color: white;
+            padding: 9px;
+        }
+
+        td {
+            border-bottom: 1px solid #ddd;
+            padding: 9px;
+        }
+
+        .mensaje-ok {
+            background: #dff0d8;
+            color: #2f6627;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+
+        .acciones {
+            display: flex;
+            gap: 6px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="contenedor">
+
+    <h1>Gestión de Contratos</h1>
+
+    <div th:if="${mensajeOk}" class="mensaje-ok" th:text="${mensajeOk}"></div>
+    <div th:if="${error}" class="error" th:text="${error}"></div>
+
+    <div class="acciones-superiores">
+        <a class="boton" th:href="@{/contratos/nuevo}">Nuevo contrato</a>
+        <a class="boton" th:href="@{/}">Volver al inicio</a>
+    </div>
+
+    <h2>Filtros</h2>
+
+    <form class="filtros" method="get" th:action="@{/contratos}">
+
+        <label>
+            Propiedad:
+            <select name="propiedadId">
+                <option value="">-- Todas --</option>
+                <option th:each="propiedad : ${propiedades}"
+                        th:value="${propiedad.id}"
+                        th:text="${propiedad.direccion + ' - ' + propiedad.ciudad}"
+                        th:selected="${propiedadId != null and propiedadId == propiedad.id}">
+                </option>
+            </select>
+        </label>
+
+        <label>
+            Inquilino:
+            <select name="inquilinoId">
+                <option value="">-- Todos --</option>
+                <option th:each="inquilino : ${inquilinos}"
+                        th:value="${inquilino.id}"
+                        th:text="${inquilino.nombre + ' ' + inquilino.apellido}"
+                        th:selected="${inquilinoId != null and inquilinoId == inquilino.id}">
+                </option>
+            </select>
+        </label>
+
+        <label>
+            Estado:
+            <select name="estado">
+                <option value="">-- Todos --</option>
+                <option th:each="estadoItem : ${estadosContrato}"
+                        th:value="${estadoItem}"
+                        th:text="${estadoItem}"
+                        th:selected="${estado != null and estado == estadoItem}">
+                </option>
+            </select>
+        </label>
+
+        <label>
+            Fecha de inicio:
+            <input type="date" name="fechaInicio" th:value="${fechaInicio}">
+        </label>
+
+        <button type="submit">Filtrar</button>
+        <a th:href="@{/contratos}">Limpiar</a>
+    </form>
+
+    <h2>Contratos registrados</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Propiedad</th>
+            <th>Propietario</th>
+            <th>Inquilino</th>
+            <th>Fecha inicio</th>
+            <th>Importe mensual</th>
+            <th>Día vencimiento</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        <tr th:if="${#lists.isEmpty(contratos)}">
+            <td colspan="9">No hay contratos para mostrar.</td>
+        </tr>
+
+        <tr th:each="contrato : ${contratos}">
+            <td th:text="${contrato.id}"></td>
+
+            <td th:text="${contrato.propiedad != null
+                          ? contrato.propiedad.direccion + ', ' + contrato.propiedad.ciudad
+                          : '-'}">
+            </td>
+
+            <td th:text="${contrato.propiedad != null and contrato.propiedad.propietario != null
+                          ? contrato.propiedad.propietario.nombre + ' ' + contrato.propiedad.propietario.apellido
+                          : '-'}">
+            </td>
+
+            <td th:text="${contrato.inquilino != null
+                          ? contrato.inquilino.nombre + ' ' + contrato.inquilino.apellido
+                          : '-'}">
+            </td>
+
+            <td th:text="${contrato.fechaInicio}"></td>
+            <td th:text="${contrato.importeMensual}"></td>
+            <td th:text="${contrato.diaVencimiento}"></td>
+            <td th:text="${contrato.estado}"></td>
+
+            <td>
+                <div class="acciones">
+                    <a th:href="@{/contratos/{id}/editar(id=${contrato.id})}">Editar</a>
+
+                    <form th:action="@{/contratos/{id}/eliminar(id=${contrato.id})}"
+                          method="post"
+                          onsubmit="return confirm('¿Eliminar este contrato?');">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

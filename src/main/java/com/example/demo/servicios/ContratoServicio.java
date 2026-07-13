@@ -1,14 +1,18 @@
 package com.example.demo.servicios;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entidades.Contrato;
+import com.example.demo.entidades.HistorialEstadoContrato;
+import com.example.demo.entidades.Propiedad;
 import com.example.demo.enums.EstadoContrato;
 import com.example.demo.enums.EstadoPropiedad;
 import com.example.demo.repositorios.ContratoRepositorio;
+import com.example.demo.repositorios.HistorialEstadoContratoRepositorio;
 //import com.sun.tools.javac.util.List;
 import com.example.demo.repositorios.PropiedadRepositorio;
 
@@ -19,10 +23,13 @@ public class ContratoServicio {
 
 	private final ContratoRepositorio contratoRepositorio;
 	private final PropiedadRepositorio propiedadRepositorio;
+	private final HistorialEstadoContratoRepositorio historialEstadoContratoRepositorio;
 
-	public ContratoServicio(ContratoRepositorio contratoRepositorio, PropiedadRepositorio propiedadRepositorio) {
+	public ContratoServicio(ContratoRepositorio contratoRepositorio, PropiedadRepositorio propiedadRepositorio,
+			HistorialEstadoContratoRepositorio historialEstadoContratoRepositorio) {
 		this.contratoRepositorio = contratoRepositorio;
 		this.propiedadRepositorio = propiedadRepositorio;
+		this.historialEstadoContratoRepositorio = historialEstadoContratoRepositorio;
 	}
 
 	// devuelve la lista de contratos que no han sido eliminados, es decir, solo
@@ -70,9 +77,19 @@ public class ContratoServicio {
 
 		// validar datos obligatorios y valores numericos
 
-		if (contrato.getPropiedad() == null) {
+		if (contrato.getPropiedad() == null || contrato.getPropiedad().getId() == null) {
 			throw new RuntimeException("Debe seleccionar una propiedad.");
 		}
+
+		// El objeto que llega del formulario solo trae el ID de la propiedad
+		// (los demás campos vienen null). Si lo usáramos tal cual para guardar,
+		// pisaríamos los datos reales de la propiedad con esos nulls. Por eso acá
+		// buscamos la propiedad completa y real en la base, y la usamos de ahora
+		// en más en vez del objeto incompleto.
+		Propiedad propiedadReal = propiedadRepositorio.findById(contrato.getPropiedad().getId())
+				.orElseThrow(() -> new RuntimeException("La propiedad seleccionada no existe."));
+
+		contrato.setPropiedad(propiedadReal);
 
 		if (contrato.getInquilino() == null) {
 			throw new RuntimeException("Debe seleccionar un inquilino.");
@@ -115,6 +132,7 @@ public class ContratoServicio {
 		// Si el contrato tiene un ID significa que ya existe y lo estamos modificando.
 		// Si el ID es null, significa que es un contrato nuevo.
 		Contrato contratoActual = null;
+		EstadoContrato estadoAnterior = null;
 
 		if (contrato.getId() != null) {
 			contratoActual = buscarPorId(contrato.getId());
@@ -123,6 +141,14 @@ public class ContratoServicio {
 			if (contratoActual == null) {
 				throw new RuntimeException("No existe un contrato con el ID indicado.");
 			}
+
+			// Guardamos el estado viejo en una variable aparte, ANTES de que se
+			// haga ningún save(). Esto es importante: Hibernate reutiliza el mismo
+			// objeto "contratoActual" dentro de la misma transacción, así que si
+			// leyéramos contratoActual.getEstado() después de guardar, ya nos
+			// devolvería el estado NUEVO (Hibernate lo pisa solo). Por eso lo
+			// capturamos ahora, en una variable simple que no se puede pisar.
+			estadoAnterior = contratoActual.getEstado();
 		}
 
 		// 1
@@ -135,6 +161,26 @@ public class ContratoServicio {
 			throw new RuntimeException("No se puede volver un contrato finalizado o rescindido a ACTIVO.");
 		}
 
+		// 1b
+		// Un contrato nuevo no puede crearse ya FINALIZADO o RESCINDIDO: para llegar
+		// a esos estados, antes tuvo que pasar por ACTIVO.
+		if (contratoActual == null && (contrato.getEstado() == EstadoContrato.FINALIZADO
+				|| contrato.getEstado() == EstadoContrato.RESCINDIDO)) {
+
+			throw new RuntimeException("Un contrato nuevo no puede crearse en estado finalizado o rescindido.");
+		}
+
+		// 1c
+		// Un contrato en BORRADOR no puede pasar directo a FINALIZADO o RESCINDIDO:
+		// primero tiene que activarse.
+		if (contratoActual != null && contratoActual.getEstado() == EstadoContrato.BORRADOR
+				&& (contrato.getEstado() == EstadoContrato.FINALIZADO
+						|| contrato.getEstado() == EstadoContrato.RESCINDIDO)) {
+
+			throw new RuntimeException(
+					"Un contrato en borrador no puede pasar directo a finalizado o rescindido. Primero debe activarse.");
+		}
+
 		// 2
 		// Solo ejecutamos esta validación cuando el contrato se está ACTIVANDO.
 
@@ -142,11 +188,11 @@ public class ContratoServicio {
 		// Indica si el contrato esta pasando al estado ACTIVO.
 		// Esto ocurre cuando se crea un contrato nuevo como ACTIVO
 		// o cuando un contrato BORRADOR cambia a ACTIVO.
-		
+
 		// Si el contrato ya estaba ACTIVO y solo estamos modificando datos
 		// (importe, duración, descripción, etc.), no corresponde volver a validar
 		// la disponibilidad de la propiedad.
-		
+
 		boolean seEstaActivando = contrato.getEstado() == EstadoContrato.ACTIVO
 				&& (contratoActual == null || contratoActual.getEstado() != EstadoContrato.ACTIVO);
 
@@ -201,7 +247,23 @@ public class ContratoServicio {
 
 		// Si todas las validaciones fueron correctas, finalmente guardamos el contrato
 		// en la base de datos.
-		return contratoRepositorio.save(contrato);
+		Contrato contratoGuardado = contratoRepositorio.save(contrato);
+
+		// Registramos en el historial cuando el contrato es nuevo, o cuando cambió
+		// de estado respecto al que tenía guardado. Lo hacemos DESPUÉS de guardar
+		// el contrato para tener siempre el ID ya asignado.
+		boolean esNuevo = (contratoActual == null);
+		boolean cambioDeEstado = (contratoActual != null && estadoAnterior != contratoGuardado.getEstado());
+
+		if (esNuevo || cambioDeEstado) {
+			HistorialEstadoContrato historial = new HistorialEstadoContrato();
+			historial.setContrato(contratoGuardado);
+			historial.setEstado(contratoGuardado.getEstado());
+			historial.setFechaCambio(LocalDateTime.now());
+			historialEstadoContratoRepositorio.save(historial);
+		}
+
+		return contratoGuardado;
 
 	}
 
@@ -210,7 +272,8 @@ public class ContratoServicio {
 		return contratoRepositorio.findById(id).orElse(null);
 	}
 
-	// elimina el contrato con el id dado sin devolver nada (void), si existe y si esta en estado borrador, sino, lo avisa con un mensaje
+	// elimina el contrato con el id dado sin devolver nada (void), si existe y si
+	// esta en estado borrador, sino, lo avisa con un mensaje
 	public void eliminarContrato(Integer id) {
 		Contrato contrato = buscarPorId(id);
 

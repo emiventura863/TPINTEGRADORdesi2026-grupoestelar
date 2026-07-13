@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Propiedades</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+    <style>
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-family: sans-serif; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #007bff; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
+        .badge { padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: bold; color: white; }
+        .bg-disponible { background-color: #28a745; }
+        .bg-reservada { background-color: #ffc107; color: #333; }
+        .bg-inactiva { background-color: #dc3545; }
+    </style>
+</head>
+<body>
+    <div class="starter-template">
+        <h1>Gestión de Propiedades</h1>
+        <h2>Bienvenido a la sección de propiedades</h2>
+    </div>
+
+    <div class="content">
+        <p>Aquí puedes agregar, buscar y administrar propiedades registradas en el sistema.</p>
+
+        <form th:action="@{/propiedades}" method="get" style="margin-bottom: 15px;">
+            <input type="text" name="direccion" placeholder="Dirección" th:value="${param.direccion}" />
+            <input type="text" name="ciudad" placeholder="Ciudad" th:value="${param.ciudad}" />
+            <select name="tipo">
+                <option value="">Todos los tipos</option>
+                <option th:each="t : ${T(com.example.demo.enums.TipoPropiedad).values()}" th:value="${t}" th:text="${t}" th:selected="${param.tipo == t}"></option>
+            </select>
+            <select name="estado">
+                <option value="">Todos los estados</option>
+                <option th:each="e : ${T(com.example.demo.enums.EstadoPropiedad).values()}" th:value="${e}" th:text="${e}" th:selected="${param.estado == e}"></option>
+            </select>
+            <button type="submit">Filtrar</button>
+            <a th:href="@{/propiedades}">Limpiar</a>
+        </form>
+
+        <a th:href="@{/propiedades/alta}" style="display:inline-block; margin-bottom: 10px;">Nueva propiedad</a>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Dirección</th>
+                    <th>Ciudad</th>
+                    <th>Tipo</th>
+                    <th>Ambientes</th>
+                    <th>M²</th>
+                    <th>Estado</th>
+                    <th>Propietario</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="p : ${listaPropiedades}">
+                    <td th:text="${p.id}">1</td>
+                    <td th:text="${p.direccion}">Av. Alem 1234</td>
+                    <td th:text="${p.ciudad}">Santa Fe</td>
+                    <td th:text="${p.tipo}">DEPARTAMENTO</td>
+                    <td th:text="${p.cantidadAmbientes}">2</td>
+                    <td th:text="${p.metrosCuadrados}">45.5</td>
+                    <td>
+                        <span th:text="${p.estado}" 
+                              th:class="'badge ' + (${p.estado.name()} == 'DISPONIBLE' ? 'bg-disponible' : (${p.estado.name()} == 'RESERVADA' ? 'bg-reservada' : 'bg-inactiva'))">
+                              DISPONIBLE
+                        </span>
+                    </td>
+                    <td th:text="${p.propietario != null} ? ${p.propietario.nombre + ' ' + p.propietario.apellido} : 'Sin propietario'"></td>
+                    <td>
+                        <a th:href="@{/propiedades/{id}(id=${p.id})}">Editar</a>
+                        <form th:action="@{/propiedades/delete/{id}(id=${p.id})}" method="post" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de eliminar esta propiedad?');">
+                             Eliminar
+                            </button>
+                      </form>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div th:if="${error}" class="alert alert-danger" style="color: red; padding: 10px; border: 1px solid red;">
+    <p th:text="${error}"></p>
+</div>
+
+<div th:if="${mensaje}" class="alert alert-success" style="color: green;">
+    <p th:text="${mensaje}"></p>
+</div>
+</body>
+</html>

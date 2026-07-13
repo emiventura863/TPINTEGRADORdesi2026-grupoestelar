@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Portal Inmobiliario - Grupo Estelar</title>
+    <link rel="stylesheet" th:href="@{/css/main.css}" />
+</head>
+<body>
+   <div class="starter-template">
+        <h1>Portal Inmobiliario - Grupo Estelar </h1>
+        <h2>
+            <span th:text="'Bienvenido'"></span>
+        </h2>
+    </div>
+    
+	<div class="menu">
+	    <a th:href="@{/propiedades}">Gestión de Propiedades</a>
+	    <a th:href="@{/publicaciones-web}">Gestión de Publicaciones</a>
+	    <a th:href="@{/contratos}">Gestión de Contratos</a>
+	    <a th:href="@{/facturas}">Gestión de Facturas</a>
+	</div>
+
+</body>
+</html>

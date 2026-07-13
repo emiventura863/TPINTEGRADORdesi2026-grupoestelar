@@ -1,0 +1,28 @@
+NOTA - INTEGRACIÓN FINAL (Emiliano Ventura, responsable Epic 3 - Contratos)
+
+Al probar el proyecto integrado (todos los Epics mergeados) encontré que
+faltaban piezas para que la aplicación funcionara correctamente, y las
+completé para poder entregar una versión funcional:
+
+EPIC 3 - CONTRATOS (mi responsabilidad):
+- Se agregó la entidad HistorialEstadoContrato (y su repositorio), que
+  el enunciado pedía y no estaba implementada.
+- Se corrigió un bug donde, al guardar un contrato, se pisaban con
+  valores nulos los datos reales de la Propiedad asociada.
+- Se completaron las validaciones de transición de estados faltantes
+  (un contrato no puede nacer FINALIZADO/RESCINDIDO, ni pasar de
+  BORRADOR directo a esos estados sin activarse antes).
+
+INTEGRACIÓN GENERAL:
+- El módulo web de Propiedades (controlador, formularios, listado) no
+  estaba integrado en el repositorio compartido, solo existía como API
+  REST. Lo completé para poder probar Contratos de punta a punta desde
+  la interfaz web (necesitaba poder elegir Propiedad e Inquilino desde
+  el formulario de Contratos).
+- Se resolvió un conflicto de mapeo duplicado en la ruta "/" entre
+  FacturaControlador y el controlador de la página de inicio.
+- Se agregaron los links de navegación en index.html a los 4 módulos.
+
+Se avisó a los compañeros de los Epics afectados sobre estos cambios.
+
+Script de datos de prueba: datos-prueba-grupoestelar.sql
